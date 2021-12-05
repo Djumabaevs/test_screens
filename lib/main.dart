@@ -1,94 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_clean_calendar/flutter_clean_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: DemoApp(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // Notice that the counter didn't reset back to zero; the application
+        // is not restarted.
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class DemoApp extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
+
   @override
-  _DemoAppState createState() => _DemoAppState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _DemoAppState extends State<DemoApp> {
-  DateTime selectedDay;
-  List selectedEvent;
-
-  final Map<DateTime, List> events = {
-    DateTime(2020, 12, 12): [
-      {'Name': 'Your event Name', 'isDone': true},
-      {'Name': 'Your event Name 2', 'isDone': true},
-      {'Name': 'Your event Name 3', 'isDone': false},
-    ],
-    DateTime(2020, 12, 2): [
-      {'Name': 'Your event Name', 'isDone': false},
-      {'Name': 'Your event Name 2', 'isDone': true},
-      {'Name': 'Your event Name 3', 'isDone': false},
-    ]
-  };
-
-  void _handleData(date) {
-    setState(() {
-      selectedDay = date;
-      selectedEvent = events[selectedDay] ?? [];
-    });
-    print(selectedDay);
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    selectedEvent = events[selectedDay] ?? [];
-    super.initState();
-  }
-
+class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Calender'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Container(
-          child: Calendar(
-            startOnMonday: true,
-            selectedColor: Colors.blue,
-            todayColor: Colors.red,
-            eventColor: Colors.green,
-            eventDoneColor: Colors.amber,
-            bottomBarColor: Colors.deepOrange,
-            onRangeSelected: (range) {
-              print('Selected Day ${range.from}, ${range.to}');
-            },
-            onDateSelected: (date) {
-              return _handleData(date);
-            },
-            events: events,
-            isExpanded: true,
-            dayOfWeekStyle: TextStyle(
-              fontSize: 13,
-              color: Colors.black,
-              fontWeight: FontWeight.w900,
-            ),
-            bottomBarTextStyle: TextStyle(
-              color: Colors.white,
-            ),
-            hideBottomBar: false,
-            isExpandable: true,
-            hideArrows: false,
-            weekDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          ),
-        ),
-      ),
+    return SfCalendar(
+      view: CalendarView.month,
+      firstDayOfWeek: 6,
+      //initialDisplayDate: DateTime(2021, 03, 01, 08, 30),
+      //initialSelectedDate: DateTime(2021, 03, 01, 08, 30),
+      dataSource: MeetingDataSource(getAppointments()),
     );
+  }
+}
+
+List<Appointment> getAppointments() {
+  List<Appointment> meetings = <Appointment>[];
+  final DateTime today = DateTime.now();
+  final DateTime startTime =
+      DateTime(today.year, today.month, today.day, 9, 0, 0);
+  final DateTime endTime = startTime.add(const Duration(hours: 2));
+
+  meetings.add(Appointment(
+      startTime: startTime,
+      endTime: endTime,
+      subject: 'Board Meeting',
+      color: Colors.blue,
+      recurrenceRule: 'FREQ=DAILY;COUNT=10',
+      isAllDay: false));
+
+  return meetings;
+}
+
+class MeetingDataSource extends CalendarDataSource {
+  MeetingDataSource(List<Appointment> source) {
+    appointments = source;
   }
 }
