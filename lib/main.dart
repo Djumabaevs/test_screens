@@ -1,97 +1,92 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_clean_calendar/flutter_clean_calendar.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Mancho',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomeCalendarPage(),
+      debugShowCheckedModeBanner: false,
+      home: DemoApp(),
     );
   }
 }
 
-class HomeCalendarPage extends StatefulWidget {
+class DemoApp extends StatefulWidget {
   @override
-  _HomeCalendarPageState createState() => _HomeCalendarPageState();
+  _DemoAppState createState() => _DemoAppState();
 }
 
-class _HomeCalendarPageState extends State<HomeCalendarPage> {
-  CalendarController _controller;
+class _DemoAppState extends State<DemoApp> {
+  DateTime selectedDay;
+  List selectedEvent;
+
+  final Map<DateTime, List> events = {
+    DateTime(2020, 12, 12): [
+      {'Name': 'Your event Name', 'isDone': true},
+      {'Name': 'Your event Name 2', 'isDone': true},
+      {'Name': 'Your event Name 3', 'isDone': false},
+    ],
+    DateTime(2020, 12, 2): [
+      {'Name': 'Your event Name', 'isDone': false},
+      {'Name': 'Your event Name 2', 'isDone': true},
+      {'Name': 'Your event Name 3', 'isDone': false},
+    ]
+  };
+
+  void _handleData(date) {
+    setState(() {
+      selectedDay = date;
+      selectedEvent = events[selectedDay] ?? [];
+    });
+    print(selectedDay);
+  }
 
   @override
   void initState() {
+    // TODO: implement initState
+    selectedEvent = events[selectedDay] ?? [];
     super.initState();
-    _controller = CalendarController();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter Calendar Example'),
+        title: Text('Calender'),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TableCalendar(
-              initialCalendarFormat: CalendarFormat.month,
-              calendarStyle: CalendarStyle(
-                  todayColor: Colors.blue,
-                  selectedColor: Theme.of(context).primaryColor,
-                  todayStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22.0,
-                      color: Colors.white)),
-              headerStyle: HeaderStyle(
-                centerHeaderTitle: true,
-                formatButtonDecoration: BoxDecoration(
-                  color: Colors.brown,
-                  borderRadius: BorderRadius.circular(22.0),
-                ),
-                formatButtonTextStyle: TextStyle(color: Colors.white),
-                formatButtonShowsNext: false,
-              ),
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              // onDaySelected: (date, events) {
-
-              // },
-              builders: CalendarBuilders(
-                selectedDayBuilder: (context, date, events) => Container(
-                    margin: const EdgeInsets.all(5.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(color: Colors.white),
-                    )),
-                todayDayBuilder: (context, date, events) => Container(
-                    margin: const EdgeInsets.all(5.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ),
-              calendarController: _controller,
-            )
-          ],
+      body: SafeArea(
+        child: Container(
+          child: Calendar(
+            startOnMonday: true,
+            selectedColor: Colors.blue,
+            todayColor: Colors.red,
+            eventColor: Colors.green,
+            eventDoneColor: Colors.amber,
+            bottomBarColor: Colors.deepOrange,
+            onRangeSelected: (range) {
+              print('Selected Day ${range.from}, ${range.to}');
+            },
+            onDateSelected: (date) {
+              return _handleData(date);
+            },
+            events: events,
+            isExpanded: true,
+            dayOfWeekStyle: TextStyle(
+              fontSize: 13,
+              color: Colors.black,
+              fontWeight: FontWeight.w900,
+            ),
+            bottomBarTextStyle: TextStyle(
+              color: Colors.white,
+            ),
+            hideBottomBar: false,
+            isExpandable: true,
+            hideArrows: false,
+            weekDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          ),
         ),
       ),
     );
